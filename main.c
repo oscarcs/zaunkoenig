@@ -14,7 +14,15 @@ WrenForeignMethodFn wren_ffi(WrenVM*, const char*, const char*, bool, const char
 void wren_terminal_open(WrenVM*);
 void wren_terminal_close(WrenVM*);
 void wren_terminal_refresh(WrenVM*);
+void wren_terminal_clear(WrenVM*);
+void wren_terminal_set(WrenVM*);
+void wren_terminal_put(WrenVM*);
 void wren_terminal_print(WrenVM*);
+void wren_terminal_print_ext(WrenVM*);
+void wren_terminal_color(WrenVM*);
+void wren_terminal_bkcolor(WrenVM*);
+void wren_terminal_state(WrenVM*);
+void wren_terminal_delay(WrenVM*);
 
 int main(void)
 {
@@ -33,21 +41,40 @@ int main(void)
     WrenInterpretResult result = wrenInterpret(vm, code);
 
     // Set up the call handles:
-    WrenHandle* entry_point = wrenMakeCallHandle(vm, "main()");
+    WrenHandle* method_entry = wrenMakeCallHandle(vm, "main()");
+    WrenHandle* method_input = wrenMakeCallHandle(vm, "input(_)");
     //@@TODO: create(), update(), pause(), etc. 
 
     // Get the entry point and run the Wren code there:    
-    wrenEnsureSlots(vm, 4);
-    wrenGetVariable(vm, "main", "Roguelike", 0); //  put the static roguelike object into 0
+    wrenEnsureSlots(vm, 8);
+    wrenGetVariable(vm, "main", "App", 0); //  put the static roguelike object into 0
     WrenHandle* main_obj = wrenGetSlotHandle(vm, 0); // store the handle
 
     wrenSetSlotHandle(vm, 0, main_obj);
-    result = wrenCall(vm, entry_point);
+    result = wrenCall(vm, method_entry);
   
     // Wait for input until user closes the window
     int cur = 0;
     while (!(cur == TK_CLOSE || cur == TK_ESCAPE)) {
         cur = terminal_read();
+
+        wrenSetSlotHandle(vm, 0, main_obj);
+        switch (cur) {
+            case TK_UP:
+                wrenSetSlotString(vm, 1, "UP");
+                break;
+            case TK_DOWN:
+                wrenSetSlotString(vm, 1, "DOWN");
+                break;
+            case TK_LEFT:
+                wrenSetSlotString(vm, 1, "LEFT");
+                break;
+            case TK_RIGHT:
+                wrenSetSlotString(vm, 1, "RIGHT");
+                break;
+        }
+
+        result = wrenCall(vm, method_input);
         // printf("keypress: %d\n", cur);
     }
   
@@ -118,7 +145,7 @@ WrenForeignMethodFn wren_ffi(
     const char* signature)
 {
     // printf("%s %s %s\n", module, class, signature);
-    if (strcmp(module, "blt") == 0 && strcmp(class, "BearLibTerminal") == 0)
+    if (strcmp(module, "blt") == 0 && strcmp(class, "Terminal") == 0)
     {
         if (strcmp(signature, "open()") == 0)
             return wren_terminal_open;
@@ -126,8 +153,24 @@ WrenForeignMethodFn wren_ffi(
             return wren_terminal_close;
         if (strcmp(signature, "refresh()") == 0)
             return wren_terminal_refresh;
+        if (strcmp(signature, "clear()") == 0)
+            return wren_terminal_clear;
+        if (strcmp(signature, "set(_)") == 0)
+            return wren_terminal_set;
+        if (strcmp(signature, "delay(_)") == 0)
+            return wren_terminal_delay;
+        if (strcmp(signature, "put(_,_,_)") == 0)
+            return wren_terminal_put;
         if (strcmp(signature, "print(_,_,_)") == 0)
             return wren_terminal_print;
+        if (strcmp(signature, "print_ext(_,_,_,_,_,_)") == 0)
+            return wren_terminal_print;
+        if (strcmp(signature, "color(_)") == 0)
+            return wren_terminal_color;
+        if (strcmp(signature, "bkcolor(_)") == 0)
+            return wren_terminal_bkcolor;
+        if (strcmp(signature, "state(_)") == 0)
+            return wren_terminal_state;
     }
     return NULL;
 }
@@ -147,10 +190,64 @@ void wren_terminal_refresh(WrenVM* vm)
     terminal_refresh();
 }
 
+void wren_terminal_clear(WrenVM* vm)
+{
+    terminal_clear();
+}
+
+void wren_terminal_set(WrenVM* vm)
+{
+    const char* s = wrenGetSlotString(vm, 1);
+    terminal_set(s);
+}
+
+void wren_terminal_put(WrenVM* vm)
+{
+    int x = (int) wrenGetSlotDouble(vm, 1);
+    int y = (int) wrenGetSlotDouble(vm, 2);
+    int s = (int) wrenGetSlotDouble(vm, 3);
+    terminal_put(x, y, s);
+}
+
 void wren_terminal_print(WrenVM* vm)
 {
     int x = (int) wrenGetSlotDouble(vm, 1);
     int y = (int) wrenGetSlotDouble(vm, 2);
     const char* s = wrenGetSlotString(vm, 3);
     terminal_print(x, y, s);
+}
+
+void wren_terminal_print_ext(WrenVM* vm)
+{
+    int x = (int) wrenGetSlotDouble(vm, 1);
+    int y = (int) wrenGetSlotDouble(vm, 2);
+    int w = (int) wrenGetSlotDouble(vm, 3);
+    int h = (int) wrenGetSlotDouble(vm, 4);
+    int a = (int) wrenGetSlotDouble(vm, 5);
+    const char* s = wrenGetSlotString(vm, 6);
+    terminal_print_ext(x, y, w, h, a, s);
+}
+
+void wren_terminal_color(WrenVM* vm)
+{
+    int c = (color_t) wrenGetSlotDouble(vm, 1);
+    terminal_color(c);
+}
+
+void wren_terminal_bkcolor(WrenVM* vm)
+{
+    int c = (color_t) wrenGetSlotDouble(vm, 1);
+    terminal_bkcolor(c);
+}
+
+void wren_terminal_state(WrenVM* vm)
+{
+    int s = (int) wrenGetSlotDouble(vm, 1);
+    terminal_state(s);
+}
+
+void wren_terminal_delay(WrenVM* vm)
+{
+    int period = (int) wrenGetSlotDouble(vm, 1);
+    terminal_delay(period);
 }
