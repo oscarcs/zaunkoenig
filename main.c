@@ -15,12 +15,15 @@ void wren_terminal_open(WrenVM*);
 void wren_terminal_close(WrenVM*);
 void wren_terminal_refresh(WrenVM*);
 void wren_terminal_clear(WrenVM*);
+void wren_terminal_clear_area(WrenVM*);
 void wren_terminal_set(WrenVM*);
 void wren_terminal_put(WrenVM*);
+void wren_terminal_pick(WrenVM*);
 void wren_terminal_print(WrenVM*);
 void wren_terminal_print_ext(WrenVM*);
 void wren_terminal_color(WrenVM*);
 void wren_terminal_bkcolor(WrenVM*);
+void wren_terminal_layer(WrenVM*);
 void wren_terminal_state(WrenVM*);
 void wren_terminal_delay(WrenVM*);
 
@@ -91,7 +94,7 @@ char* wren_load_module(WrenVM* vm, const char* name)
     sprintf(qualified_name, "wren/%s.wren", name);
     // printf("Attempting to load %s\n", qualified_name);
 
-    char* string = "";
+    char* string = NULL;
 
     // Open and load the file.
     FILE *f = fopen(qualified_name, "rb");
@@ -124,7 +127,7 @@ void wren_error(WrenVM* vm, WrenErrorType type, const char* module, int line, co
     switch (type)
     {
         case WREN_ERROR_COMPILE:
-            printf("Wren compilation error: Module %s, line %d: %s\n", module, line, message);
+            printf("Wren compilation error: Module '%s', line %d: %s\n", module, line, message);
             break;
 
         case WREN_ERROR_RUNTIME:
@@ -132,7 +135,7 @@ void wren_error(WrenVM* vm, WrenErrorType type, const char* module, int line, co
             break; 
 
         case WREN_ERROR_STACK_TRACE:
-            printf("\tModule %s, line %d: %s\n", module, line, message);
+            printf("\tModule '%s', line %d: %s\n", module, line, message);
             break;
     }
 }
@@ -155,11 +158,13 @@ WrenForeignMethodFn wren_ffi(
             return wren_terminal_refresh;
         if (strcmp(signature, "clear()") == 0)
             return wren_terminal_clear;
+        if (strcmp(signature, "clear_area(_,_,_,_)") == 0)
+            return wren_terminal_clear_area;
         if (strcmp(signature, "set(_)") == 0)
             return wren_terminal_set;
-        if (strcmp(signature, "delay(_)") == 0)
-            return wren_terminal_delay;
         if (strcmp(signature, "put(_,_,_)") == 0)
+            return wren_terminal_put;
+        if (strcmp(signature, "pick(_,_,_)") == 0)
             return wren_terminal_put;
         if (strcmp(signature, "print(_,_,_)") == 0)
             return wren_terminal_print;
@@ -169,8 +174,12 @@ WrenForeignMethodFn wren_ffi(
             return wren_terminal_color;
         if (strcmp(signature, "bkcolor(_)") == 0)
             return wren_terminal_bkcolor;
+        if (strcmp(signature, "layer(_)") == 0)
+            return wren_terminal_layer;
         if (strcmp(signature, "state(_)") == 0)
             return wren_terminal_state;
+        if (strcmp(signature, "delay(_)") == 0)
+            return wren_terminal_delay;
     }
     return NULL;
 }
@@ -195,6 +204,15 @@ void wren_terminal_clear(WrenVM* vm)
     terminal_clear();
 }
 
+void wren_terminal_clear_area(WrenVM* vm)
+{
+    int x = (int) wrenGetSlotDouble(vm, 1);
+    int y = (int) wrenGetSlotDouble(vm, 2);
+    int w = (int) wrenGetSlotDouble(vm, 3);
+    int h = (int) wrenGetSlotDouble(vm, 4);
+    terminal_clear_area(x, y, w, h);
+}
+
 void wren_terminal_set(WrenVM* vm)
 {
     const char* s = wrenGetSlotString(vm, 1);
@@ -207,6 +225,14 @@ void wren_terminal_put(WrenVM* vm)
     int y = (int) wrenGetSlotDouble(vm, 2);
     int s = (int) wrenGetSlotDouble(vm, 3);
     terminal_put(x, y, s);
+}
+
+void wren_terminal_pick(WrenVM* vm)
+{
+    int x = (int) wrenGetSlotDouble(vm, 1);
+    int y = (int) wrenGetSlotDouble(vm, 2);
+    int i = (int) wrenGetSlotDouble(vm, 3);
+    terminal_pick(x, y, i);
 }
 
 void wren_terminal_print(WrenVM* vm)
@@ -238,6 +264,12 @@ void wren_terminal_bkcolor(WrenVM* vm)
 {
     int c = (color_t) wrenGetSlotDouble(vm, 1);
     terminal_bkcolor(c);
+}
+
+void wren_terminal_layer(WrenVM* vm)
+{
+    int l = (int) wrenGetSlotDouble(vm, 1);
+    terminal_layer(l);
 }
 
 void wren_terminal_state(WrenVM* vm)
