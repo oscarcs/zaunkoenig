@@ -17,6 +17,8 @@ class World {
         Events.listener(this, "MOVE")
     }
 
+    id { -1 }
+
     add(entity) {
         _entities.add(entity)
     }
@@ -28,8 +30,13 @@ class World {
         
         } else if (event.type == "CAN_MOVE") {
         
-
-
+            var payload = event.data.split(",")
+            var x = Num.fromString(payload[0]) 
+            var y = Num.fromString(payload[1]) 
+            var id = Num.fromString(payload[2]) 
+            if (!readMap(x, y).solid) {
+                Events.queue_id(id, "MOVE", "%(x),%(y)")
+            }
         }
 
     }
@@ -88,5 +95,9 @@ class Tile {
         Terminal.color(__typeToColor[_type])
         Terminal.bkcolor(__typeToBkcolor[_type])
         Terminal.print(x, y, tile)
+    }
+
+    solid {
+        return _solid
     }
 }

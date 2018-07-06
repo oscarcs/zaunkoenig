@@ -44,6 +44,22 @@ class EventQueue {
             }
         }
     }
+
+    //@@TODO: not sure if this is the best way to do this
+    queue_id(id, event) {
+        if (_listeners.containsKey(event.type)) {
+            for (l in _listeners[event.type]) {
+                if (l.id == id) {
+                    l.listen(event)
+                }    
+            }
+        }
+    }
+    
+    queue_id(id, type, data) {
+        var e = Event.new(type, data)
+        queue_id(id, e)
+    }
 }
 
 // Initialize a singleton to be imported

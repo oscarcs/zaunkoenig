@@ -1,7 +1,11 @@
 import "component" for Component, PlayerComponent
 
+var NextID = 0
+
 class Entity {
-    construct new(parent) {
+    construct new(id, parent) {
+        _id = id
+        NextID = NextID + 1
         _parent = parent
         _components = []
     }
@@ -13,6 +17,10 @@ class Entity {
     listen(event) {
         
     }
+
+    id {
+        return _id
+    }
 }
 
 class EntityFactory {
@@ -21,7 +29,7 @@ class EntityFactory {
     }
 
     create(type) {
-        var e = Entity.new(_world)
+        var e = Entity.new(NextID, _world)
         if (type == "PLAYER") {
             e.add(PlayerComponent.new(e))
         }

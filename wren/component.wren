@@ -10,6 +10,10 @@ class Component {
     listen(event) {
 
     }
+
+    id {
+        return _parent.id
+    }
 }
 
 class PlayerComponent is Component {
@@ -19,15 +23,24 @@ class PlayerComponent is Component {
         _y = 1
         Events.listener(this, "KEYPRESS")
         Events.listener(this, "DRAW")
+        Events.listener(this, "MOVE")
     }
 
     listen(event) {
         if (event.type == "KEYPRESS") {
 
-            if (Input.isMoveUp(event.data))    _y = _y - 1
-            if (Input.isMoveDown(event.data))  _y = _y + 1
-            if (Input.isMoveLeft(event.data))  _x = _x - 1
-            if (Input.isMoveRight(event.data)) _x = _x + 1
+            if (Input.isMoveUp(event.data))    Events.queue("CAN_MOVE", "%(_x),%(_y-1),%(id)")
+            if (Input.isMoveDown(event.data))  Events.queue("CAN_MOVE", "%(_x),%(_y+1),%(id)")
+            if (Input.isMoveLeft(event.data))  Events.queue("CAN_MOVE", "%(_x-1),%(_y),%(id)")
+            if (Input.isMoveRight(event.data)) Events.queue("CAN_MOVE", "%(_x+1),%(_y),%(id)")
+
+        } else if (event.type == "MOVE") {
+
+            var payload = event.data.split(",")
+            var x = Num.fromString(payload[0])
+            var y = Num.fromString(payload[1])
+            _x = x
+            _y = y
 
         } else if (event.type == "DRAW") {
 
