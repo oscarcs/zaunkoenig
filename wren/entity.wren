@@ -1,7 +1,8 @@
 import "component" for Component, PlayerComponent
 
 class Entity {
-    construct new() {
+    construct new(parent) {
+        _parent = parent
         _components = []
     }
 
@@ -10,37 +11,20 @@ class Entity {
     }
 
     listen(event) {
-        for (c in _components) {
-            c.listen(event)
-        }
+        
     }
 }
 
 class EntityFactory {
-    construct new() {
-
+    construct new(world) {
+        _world = world
     }
 
     create(type) {
-        var e = Entity.new()
+        var e = Entity.new(_world)
         if (type == "PLAYER") {
-            e.add(PlayerComponent.new())
+            e.add(PlayerComponent.new(e))
         }
         return e
-    }
-}
-
-class Event {
-    construct new(type, data) {
-        _type = type
-        _data = data
-    }
-
-    type {
-        return _type
-    }
-
-    data {
-        return _data
     }
 }
