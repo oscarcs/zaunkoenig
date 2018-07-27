@@ -62,23 +62,9 @@ int main(void)
         cur = terminal_read();
 
         wrenSetSlotHandle(vm, 0, main_obj);
-        switch (cur) {
-            case TK_UP:
-                wrenSetSlotString(vm, 1, "UP");
-                break;
-            case TK_DOWN:
-                wrenSetSlotString(vm, 1, "DOWN");
-                break;
-            case TK_LEFT:
-                wrenSetSlotString(vm, 1, "LEFT");
-                break;
-            case TK_RIGHT:
-                wrenSetSlotString(vm, 1, "RIGHT");
-                break;
-        }
+        wrenSetSlotDouble(vm, 1, cur);
 
         result = wrenCall(vm, method_input);
-        // printf("keypress: %d\n", cur);
     }
   
     terminal_close();

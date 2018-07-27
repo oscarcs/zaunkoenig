@@ -24,9 +24,8 @@ class Game {
     }
 
     input(key) {
-        if (Input.isMovement(key)) {
-            Events.queue("KEYPRESS", key)
-        }
+        key = Input.normalize(key)
+        Events.queue("KEYPRESS", key)
 
         draw()
     }

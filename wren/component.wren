@@ -29,10 +29,10 @@ class PlayerComponent is Component {
     listen(event) {
         if (event.type == "KEYPRESS") {
 
-            if (Input.isMoveUp(event.data))    Events.queue("CAN_MOVE", "%(_x),%(_y-1),%(id)")
-            if (Input.isMoveDown(event.data))  Events.queue("CAN_MOVE", "%(_x),%(_y+1),%(id)")
-            if (Input.isMoveLeft(event.data))  Events.queue("CAN_MOVE", "%(_x-1),%(_y),%(id)")
-            if (Input.isMoveRight(event.data)) Events.queue("CAN_MOVE", "%(_x+1),%(_y),%(id)")
+            if (event.data == "UP")    Events.queue("CAN_MOVE", "%(_x),%(_y-1),%(id)")
+            if (event.data == "DOWN")  Events.queue("CAN_MOVE", "%(_x),%(_y+1),%(id)")
+            if (event.data == "LEFT")  Events.queue("CAN_MOVE", "%(_x-1),%(_y),%(id)")
+            if (event.data == "RIGHT") Events.queue("CAN_MOVE", "%(_x+1),%(_y),%(id)")
 
         } else if (event.type == "MOVE") {
 
