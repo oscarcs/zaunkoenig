@@ -14,4 +14,14 @@ class Terminal {
     foreign static bkcolor(color)
     foreign static layer(layer)
     foreign static delay(period)
+    
+    // Wrapper method for tile drawing
+    static tile(x, y, tile) {
+        put(x, y, tile + 0x80)
+    }
+
+    // Wrapper method for printing text
+    static text(x, y, text) {
+        print(x, y - 1, text)
+    }
 }

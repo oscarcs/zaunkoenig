@@ -4,7 +4,7 @@ class InputClass {
 
     }
 
-    // Transform the C-layer input string into a general 'action string'
+    // Transform the C-layer input code into a general 'action string'
     // We can use this function to effectively rebind keys.
     normalize(key) {
         if (key == this.TK_X) return "INTERACT"

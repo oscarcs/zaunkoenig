@@ -52,6 +52,6 @@ class PlayerComponent is Component {
     draw() {
         Terminal.layer(1)
         Terminal.color(0xFFFF00FF)
-        Terminal.print(_x, _y, "@")
+        Terminal.tile(_x, _y, 1)
     }
 }

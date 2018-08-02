@@ -7,7 +7,7 @@ class World {
         _h = 100
 
         _entities = []
-        _map = List.filled(_w * _h, Tile.new(0, false))
+        _map = List.filled(_w * _h, Tile.new(1, false))
         
         // Generate the map
         generate()
@@ -17,6 +17,7 @@ class World {
         Events.listener(this, "MOVE")
     }
 
+    // Hardcode the ID
     id { -1 }
 
     add(entity) {
@@ -44,10 +45,16 @@ class World {
     draw() {
         //@@TODO: this is probably going to have to be smarter...
         Terminal.layer(0)
+        Terminal.color(0xFFFFFFFF)
+        Terminal.bkcolor(0xFFFFFFFF)
 
-        for (x in 0..._w) {
-            for (y in 0..._h) {
-                _map[x + _w * y].draw(x, y)       
+        for (x in 0...(_w-1)) {
+            for (y in 0...(_h-1)) {
+                var u = _map[x + _w * (y-1)]
+                var d = _map[x + _w * (y+1)]
+                var l = _map[(x-1) + _w * y]
+                var r = _map[(x+1) + _w * y]
+                _map[x + _w * y].draw(x, y, u, d, l, r)       
             }
         }
     }
@@ -73,28 +80,25 @@ class Tile {
     construct new(type, solid) {
         _type = type
         _solid = solid
-
-        __typeToTile = {
-            0: ".",
-            1: "#"
-        }
-
-        __typeToColor = {
-            0: 0xFF006019,
-            1: 0xFF000000
-        }
-
-        __typeToBkcolor = {
-            0: 0xFF004713,
-            1: 0xFF004713
-        }
     }
 
-    draw(x, y) {
-        var tile = __typeToTile[_type]
-        Terminal.color(__typeToColor[_type])
-        Terminal.bkcolor(__typeToBkcolor[_type])
-        Terminal.print(x, y, tile)
+    // x: x position
+    // y: y position
+    // u: type of tile above
+    // d: type of tile below
+    // l: type of tile left
+    // r: type of tile right
+    draw(x, y, u, d, l, r) {
+        var tile = 0
+
+        // Road
+        if (_type == 0) {
+            tile = 1
+        } else if (_type == 1) {
+            tile = 7 * 8
+        }
+
+        Terminal.tile(x, y, tile)
     }
 
     solid {
